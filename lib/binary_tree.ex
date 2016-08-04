@@ -1,11 +1,14 @@
 defmodule BinaryTree do
   @moduledoc """
   A binary search tree
-
-  The structure of each node is:
-  {key, value, left, right}
-  nil is an empty tree
   """
+
+  defstruct(
+    key: nil,
+    value: nil,
+    left: nil,
+    right: nil
+  )
 
   def new do
     nil
@@ -23,22 +26,22 @@ defmodule BinaryTree do
   """
   # Insertion into an empty tree
   def insert(nil, key, value) do
-    {key, value, nil, nil}
+    %__MODULE__{key: key, value: value}
   end
 
   # Replace existing key with new value
-  def insert({key, _root_value, left, right}, key, value) do
-    {key, value, left, right}
+  def insert(%__MODULE__{key: key} = node, key, value) do
+    %{node | value: value}
   end
 
   # Insert in left subtree
-  def insert({root_key, root_value, left, right}, key, value) when key < root_key do
-    {root_key, root_value, insert(left, key, value), right}
+  def insert(%__MODULE__{key: root_key} = node, key, value) when key < root_key do
+    %{node | left: insert(node.left, key, value)}
   end
 
   # Insert in right subtree
-  def insert({root_key, root_value, left, right}, key, value) when key > root_key do
-    {root_key, root_value, left, insert(right, key, value)}
+  def insert(%__MODULE__{key: root_key} = node, key, value) when key > root_key do
+    %{node | right: insert(node.right, key, value)}
   end
 
   @doc """
@@ -49,15 +52,15 @@ defmodule BinaryTree do
   def search(nil, _key), do: {:error, :not_found}
 
   # Search in tree with root key equal to search key
-  def search({key, value, _left, _right}, key), do: {:ok, value}
+  def search(%__MODULE__{key: key, value: value}, key), do: {:ok, value}
 
   # Search left subtree
-  def search({root_key, _value, left, _right}, key) when key < root_key do
+  def search(%__MODULE__{key: root_key, left: left}, key) when key < root_key do
     search(left, key)
   end
 
   # Search right subtree
-  def search({root_key, _value, _left, right}, key) when key > root_key do
+  def search(%__MODULE__{key: root_key, right: right}, key) when key > root_key do
     search(right, key)
   end
 
@@ -68,41 +71,42 @@ defmodule BinaryTree do
   def delete(nil, _key), do: nil
 
   # Delete root node with no children
-  def delete({key, _value, nil, nil}, key), do: nil
+  def delete(%__MODULE__{key: key, left: nil, right: nil}, key), do: nil
 
   # Delete root node with left child
-  def delete({key, _value, left, nil}, key), do: left
+  def delete(%__MODULE__{key: key, left: left, right: nil}, key), do: left
 
   # Delete root node with right child
-  def delete({key, _value, nil, right}, key), do: right
+  def delete(%__MODULE__{key: key, left: nil, right: right}, key), do: right
 
   # Delete root node with two children. This is done by copying the in-order
   # predecessor to the root and then recursivley deleting the predecessor in the 
   # left subtree
-  def delete({key, _value, left, right}, key) do
-    {pre_key, pre_value, _left, _right} = max(left)
-    {pre_key, pre_value, delete(left, pre_key), right}
+  def delete(%__MODULE__{key: key} = node, key) do
+    predecessor = max(node.left)
+    %{node | left: delete(node.left, predecessor.key), key: predecessor.key, value: predecessor.value}
   end
 
   # Delete in left subtree
-  def delete({root_key, value, left, right}, key) when key < root_key do
-    {root_key, value, delete(left, key), right}
+  def delete(%__MODULE__{key: root_key} = node, key) when key < root_key do
+    %{node | left: delete(node.left, key)}
   end
 
   # Delete in right subtree
-  def delete({root_key, value, left, right}, key) when key > root_key do
-    {root_key, value, left, delete(right, key)}
+  def delete(%__MODULE__{key: root_key} = node, key) when key > root_key do
+    %{node | right: delete(node.right, key)}
   end
 
   @doc """
   Returns the maximum height of the tree. An empty tree has height 0
+  Note: It traverses the entire tree. Use with caution
   """
   def height(nil), do: 0
-  def height({_k, _v, left, right}) do
-    1 + Enum.max([height(left), height(right)])
+  def height(%__MODULE__{} = node) do
+    1 + Enum.max([height(node.left), height(node.right)])
   end
 
   # Returns the maximum (right-most) subtree of a tree
-  defp max({_k, _v, _left, nil} = tree), do: tree
-  defp max({_k, _v, _left, right}), do: max(right)
+  defp max(%__MODULE__{right: nil} = node), do: node
+  defp max(%__MODULE__{right: right}), do: max(right)
 end
