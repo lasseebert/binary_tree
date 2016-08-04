@@ -1,11 +1,15 @@
 defmodule BinaryTree do
   @moduledoc """
-  A binary search tree
+  A binary search tree.
+
+  This is implemeted as a self balancing AA tree
+  See: https://en.wikipedia.org/wiki/AA_tree
   """
 
   defstruct(
     key: nil,
     value: nil,
+    level: 1,
     left: nil,
     right: nil
   )
@@ -37,11 +41,15 @@ defmodule BinaryTree do
   # Insert in left subtree
   def insert(%__MODULE__{key: root_key} = node, key, value) when key < root_key do
     %{node | left: insert(node.left, key, value)}
+    |> skew
+    |> split
   end
 
   # Insert in right subtree
   def insert(%__MODULE__{key: root_key} = node, key, value) when key > root_key do
     %{node | right: insert(node.right, key, value)}
+    |> skew
+    |> split
   end
 
   @doc """
@@ -109,4 +117,23 @@ defmodule BinaryTree do
   # Returns the maximum (right-most) subtree of a tree
   defp max(%__MODULE__{right: nil} = node), do: node
   defp max(%__MODULE__{right: right}), do: max(right)
+
+  # Rotate tree to turn an invalid left horizontal link into a valid right
+  # horizontal link
+  defp skew(nil), do: nil
+  defp skew(%__MODULE__{left: nil} = node), do: node
+  defp skew(%__MODULE__{level: level, left: %__MODULE__{level: level}} = node) do
+    %{node.left | right: %{node | left: node.left.right}}
+  end
+  defp skew(%__MODULE__{} = node), do: node
+
+  # Rotate tree to turn a double right horizontal link into a tree with a higher
+  # level
+  defp split(nil), do: nil
+  defp split(%__MODULE__{right: nil} = node), do: node
+  defp split(%__MODULE__{right: %__MODULE__{right: nil}} = node), do: node
+  defp split(%__MODULE__{level: level, right: %__MODULE__{right: %__MODULE__{level: level}}} = node) do
+    %{node.right | level: node.right.level + 1, left: %{node | right: node.right.left}}
+  end
+  defp split(%__MODULE__{} = node), do: node
 end
