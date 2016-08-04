@@ -16,8 +16,8 @@ defmodule BinaryTree do
     {root_key, root_value, left, insert(right, key, value)}
   end
 
-  def search({key, value, _left, _right}, key), do: {:ok, value}
   def search(nil, _key), do: {:error, :not_found}
+  def search({key, value, _left, _right}, key), do: {:ok, value}
   def search({root_key, _value, left, _right}, key) when key < root_key do
     search(left, key)
   end
