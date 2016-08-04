@@ -41,15 +41,13 @@ defmodule BinaryTree do
   # Insert in left subtree
   def insert(%{key: root_key} = tree, key, value) when key < root_key do
     %{tree | left: insert(tree.left, key, value)}
-    |> skew
-    |> split
+    |> balance_after_insert
   end
 
   # Insert in right subtree
   def insert(%{key: root_key} = tree, key, value) when key > root_key do
     %{tree | right: insert(tree.right, key, value)}
-    |> skew
-    |> split
+    |> balance_after_insert
   end
 
   @doc """
@@ -81,28 +79,32 @@ defmodule BinaryTree do
   # Delete root node with no children
   def delete(%{key: key, left: nil, right: nil}, key), do: nil
 
-  # Delete root node with left child
-  def delete(%{key: key, left: left, right: nil}, key), do: left
+  # Delete root node without left child
+  # This is done by copying the in-order successor to the root and then
+  # recursivley deleting the successor in the right subtree
+  def delete(%{key: key, left: nil} = tree, key) do
+    successor = min(tree.right)
+    %{tree | right: delete(tree.right, successor.key), key: successor.key, value: successor.value}
+    |> balance_after_delete
+  end
 
-  # Delete root node with right child
-  def delete(%{key: key, left: nil, right: right}, key), do: right
-
-  # Delete root node with two children. This is done by copying the in-order
-  # predecessor to the root and then recursivley deleting the predecessor in the 
-  # left subtree
+  # Delete root node with left child - opposite as above
   def delete(%{key: key} = tree, key) do
     predecessor = max(tree.left)
     %{tree | left: delete(tree.left, predecessor.key), key: predecessor.key, value: predecessor.value}
+    |> balance_after_delete
   end
 
   # Delete in left subtree
   def delete(%{key: root_key} = tree, key) when key < root_key do
     %{tree | left: delete(tree.left, key)}
+    |> balance_after_delete
   end
 
   # Delete in right subtree
   def delete(%{key: root_key} = tree, key) when key > root_key do
     %{tree | right: delete(tree.right, key)}
+    |> balance_after_delete
   end
 
   @doc """
@@ -117,6 +119,10 @@ defmodule BinaryTree do
   # Returns the maximum (right-most) subtree of a tree
   defp max(%{right: nil} = tree), do: tree
   defp max(%{right: right}), do: max(right)
+
+  # Returns the minimum (left-most) subtree of a tree
+  defp min(%{left: nil} = tree), do: tree
+  defp min(%{left: left}), do: min(left)
 
   # Rotate tree to turn an invalid left horizontal link into a valid right
   # horizontal link
@@ -136,4 +142,58 @@ defmodule BinaryTree do
     %{tree.right | level: tree.right.level + 1, left: %{tree | right: tree.right.left}}
   end
   defp split(%{} = tree), do: tree
+
+  defp balance_after_insert(tree) do
+    tree
+    |> skew
+    |> split
+  end
+
+  defp balance_after_delete(nil), do: nil
+  defp balance_after_delete(tree) do
+    tree
+    |> decrease_level
+    |> skew
+    |> skew_right
+    |> skew_right_right
+    |> split
+    |> split_right
+  end
+
+  defp decrease_level(%{left: nil, right: nil} = tree) do
+    decrease_level(tree, 1)
+  end
+  defp decrease_level(%{left: left, right: nil} = tree) do
+    decrease_level(tree, left.level + 1)
+  end
+  defp decrease_level(%{left: nil, right: right} = tree) do
+    decrease_level(tree, right.level + 1)
+  end
+  defp decrease_level(%{left: left, right: right} = tree) do
+    needed_level = Enum.min([left.level, right.level]) + 1
+    decrease_level(tree, needed_level)
+  end
+  defp decrease_level(%{level: level} = tree, needed_level) when needed_level >= level, do: tree
+  defp decrease_level(%{right: nil} = tree, needed_level) do
+    %{tree | level: needed_level}
+  end
+  defp decrease_level(%{right: %{level: level}} = tree, needed_level) when needed_level >= level do
+    %{tree | level: needed_level}
+  end
+  defp decrease_level(tree, needed_level) do
+    %{tree | level: needed_level, right: %{tree.right | level: needed_level}}
+  end
+
+  defp skew_right(%{right: right} = tree) do
+    %{tree | right: skew(right)}
+  end
+
+  defp skew_right_right(%{right: nil} = tree), do: tree
+  defp skew_right_right(tree) do
+    %{tree | right: %{tree.right | right: skew(tree.right.right)}}
+  end
+
+  defp split_right(%{right: right} = tree) do
+    %{tree | right: split(right)}
+  end
 end

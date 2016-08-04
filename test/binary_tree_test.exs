@@ -114,6 +114,18 @@ defmodule BinaryTreeTest do
 
       assert new_tree == tree
     end
+
+    test "it is balanced" do
+      tree = 1..1000
+              |> Enum.reduce(BinaryTree.new, fn value, tree -> BinaryTree.insert(tree, value) end)
+      height = BinaryTree.height(tree)
+
+      tree = 1..500
+              |> Enum.reduce(tree, fn value, tree -> BinaryTree.delete(tree, value) end)
+      new_height = BinaryTree.height(tree)
+
+      assert new_height < height
+    end
   end
 
   defp build_tree(_context) do
