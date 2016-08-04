@@ -17,6 +17,9 @@ defmodule BinaryTree do
   def insert(nil, key, value) do
     {key, value, nil, nil}
   end
+  def insert({key, _root_value, left, right}, key, value) do
+    {key, value, left, right}
+  end
   def insert({root_key, root_value, left, right}, key, value) when key < root_key do
     {root_key, root_value, insert(left, key, value), right}
   end

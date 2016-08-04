@@ -46,6 +46,15 @@ defmodule BinaryTreeTest do
       }
     end
 
+    test "insert the same element overwrites it" do
+      tree = BinaryTree.new
+              |> BinaryTree.insert(5, "fyve")
+              |> BinaryTree.insert(5, "five")
+
+      assert 1 == BinaryTree.height(tree)
+      assert {:ok, "five"} == BinaryTree.search(tree, 5)
+    end
+
     test "it is balanced" do
       tree = 1..1000
               |> Enum.reduce(BinaryTree.new, fn value, tree -> BinaryTree.insert(tree, value) end)
@@ -109,13 +118,13 @@ defmodule BinaryTreeTest do
   end
 
   defp build_tree(_context) do
-      tree = BinaryTree.new
-              |> BinaryTree.insert(5, "five")
-              |> BinaryTree.insert(6, "six")
-              |> BinaryTree.insert(3, "three")
-              |> BinaryTree.insert(4, "four")
-              |> BinaryTree.insert(2, "two")
-              |> BinaryTree.insert(8, "eight")
-    %{tree: tree}
+    tree = BinaryTree.new
+            |> BinaryTree.insert(5, "five")
+            |> BinaryTree.insert(6, "six")
+            |> BinaryTree.insert(3, "three")
+            |> BinaryTree.insert(4, "four")
+            |> BinaryTree.insert(2, "two")
+            |> BinaryTree.insert(8, "eight")
+      %{tree: tree}
   end
 end
