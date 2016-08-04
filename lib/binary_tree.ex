@@ -1,4 +1,12 @@
 defmodule BinaryTree do
+  @moduledoc """
+  A binary search tree
+
+  The structure of each node is:
+  {key, value, left, right}
+  nil is an empty tree
+  """
+
   def new do
     nil
   end
@@ -38,6 +46,12 @@ defmodule BinaryTree do
   end
   def delete({root_key, value, left, right}, key) when key > root_key do
     {root_key, value, left, delete(right, key)}
+  end
+
+  def height(tree)
+  def height(nil), do: 0
+  def height({_k, _v, left, right}) do
+    1 + Enum.max([height(left), height(right)])
   end
 
   defp max({_k, _v, _left, nil} = tree), do: tree

@@ -45,6 +45,13 @@ defmodule BinaryTreeTest do
         }
       }
     end
+
+    test "it is balanced" do
+      tree = 1..1000
+              |> Enum.reduce(BinaryTree.new, fn value, tree -> BinaryTree.insert(tree, value) end)
+
+      assert BinaryTree.height(tree) < 100
+    end
   end
 
   describe "search" do
