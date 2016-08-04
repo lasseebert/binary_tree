@@ -19,7 +19,7 @@ defmodule BinaryTree do
   end
 
   @doc """
-  Inserts a new node in the tree
+  Inserts a key-value pair into the tree
   """
   # Insertion into an empty tree
   def insert(nil, key, value) do

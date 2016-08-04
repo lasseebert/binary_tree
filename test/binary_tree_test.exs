@@ -4,46 +4,45 @@ defmodule BinaryTreeTest do
 
   describe "insert" do
     test "insert an element to an empty tree" do
-      result = BinaryTree.new
-                |> BinaryTree.insert(1)
+      tree = BinaryTree.new
+              |> BinaryTree.insert(1)
 
-      assert result == {1, 1, nil, nil}
+      assert 1 == BinaryTree.height(tree)
+      assert {:ok, 1} == BinaryTree.search(tree, 1)
     end
 
     test "insert two elements in increasing order" do
-      result = BinaryTree.new
-                |> BinaryTree.insert(1)
-                |> BinaryTree.insert(2)
+      tree = BinaryTree.new
+              |> BinaryTree.insert(1)
+              |> BinaryTree.insert(2)
 
-      assert result == {1, 1, nil, {2, 2, nil, nil}}
+      assert 2 == BinaryTree.height(tree)
+      assert {:ok, 1} == BinaryTree.search(tree, 1)
+      assert {:ok, 2} == BinaryTree.search(tree, 2)
     end
 
     test "insert two elements in decreasing order" do
-      result = BinaryTree.new
-                |> BinaryTree.insert(2)
-                |> BinaryTree.insert(1)
+      tree = BinaryTree.new
+              |> BinaryTree.insert(2)
+              |> BinaryTree.insert(1)
 
-      assert result == {2, 2, {1, 1, nil, nil}, nil}
+      assert 2 == BinaryTree.height(tree)
+      assert {:ok, 1} == BinaryTree.search(tree, 1)
+      assert {:ok, 2} == BinaryTree.search(tree, 2)
     end
 
     test "insert a bunch of elements" do
-      result = BinaryTree.new
-                |> BinaryTree.insert(5)
-                |> BinaryTree.insert(6)
-                |> BinaryTree.insert(4)
-                |> BinaryTree.insert(3)
+      tree = BinaryTree.new
+              |> BinaryTree.insert(5)
+              |> BinaryTree.insert(6)
+              |> BinaryTree.insert(4)
+              |> BinaryTree.insert(3)
 
-      assert result == {
-        5, 5,
-        {
-          4, 4,
-          {3, 3, nil, nil},
-          nil
-        },
-        {
-          6, 6, nil, nil
-        }
-      }
+      assert 3 == BinaryTree.height(tree)
+      assert {:ok, 3} == BinaryTree.search(tree, 3)
+      assert {:ok, 4} == BinaryTree.search(tree, 4)
+      assert {:ok, 5} == BinaryTree.search(tree, 5)
+      assert {:ok, 6} == BinaryTree.search(tree, 6)
     end
 
     test "insert the same element overwrites it" do
