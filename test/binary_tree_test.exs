@@ -48,24 +48,67 @@ defmodule BinaryTreeTest do
   end
 
   describe "search" do
-    test "it finds existing item" do
-      tree = BinaryTree.new
-              |> BinaryTree.insert(5, "five")
-              |> BinaryTree.insert(6, "six")
-              |> BinaryTree.insert(4, "four")
-              |> BinaryTree.insert(3, "three")
+    setup [:build_tree]
 
+    test "it finds existing item", %{tree: tree} do
       assert BinaryTree.search(tree, 3) == {:ok, "three"}
     end
 
-    test "it reports not_found when not found" do
+    test "it reports not_found when not found", %{tree: tree} do
+      assert BinaryTree.search(tree, 7) == {:error, :not_found}
+    end
+  end
+
+  describe "delete" do
+    setup [:build_tree]
+
+    test "it deletes a leaf", %{tree: tree} do
+      tree = BinaryTree.delete(tree, 2)
+
+      assert {:error, :not_found} == BinaryTree.search(tree, 2)
+      assert {:ok, "three"} == BinaryTree.search(tree, 3)
+    end
+
+    test "it deletes root when only root exists" do
+      tree = BinaryTree.new
+              |> BinaryTree.insert(2)
+              |> BinaryTree.delete(2)
+      assert tree == BinaryTree.new
+    end
+
+    test "it deletes node with one child", %{tree: tree} do
+      tree = BinaryTree.delete(tree, 6)
+
+      assert {:error, :not_found} == BinaryTree.search(tree, 6)
+      assert {:ok, "five"} == BinaryTree.search(tree, 5)
+      assert {:ok, "eight"} == BinaryTree.search(tree, 8)
+    end
+
+    test "it deletes node with two children", %{tree: tree} do
+      tree = BinaryTree.delete(tree, 3)
+
+      assert {:error, :not_found} == BinaryTree.search(tree, 3)
+      assert {:ok, "two"} == BinaryTree.search(tree, 2)
+      assert {:ok, "four"} == BinaryTree.search(tree, 4)
+      assert {:ok, "five"} == BinaryTree.search(tree, 5)
+      assert {:ok, "eight"} == BinaryTree.search(tree, 8)
+    end
+
+    test "it returns the same tree if key does not exist", %{tree: tree} do
+      new_tree = BinaryTree.delete(tree, 7)
+
+      assert new_tree == tree
+    end
+  end
+
+  defp build_tree(_context) do
       tree = BinaryTree.new
               |> BinaryTree.insert(5, "five")
               |> BinaryTree.insert(6, "six")
-              |> BinaryTree.insert(4, "four")
               |> BinaryTree.insert(3, "three")
-
-      assert BinaryTree.search(tree, 7) == {:error, :not_found}
-    end
+              |> BinaryTree.insert(4, "four")
+              |> BinaryTree.insert(2, "two")
+              |> BinaryTree.insert(8, "eight")
+    %{tree: tree}
   end
 end
