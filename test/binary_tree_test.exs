@@ -58,7 +58,7 @@ defmodule BinaryTreeTest do
       tree = 1..1000
               |> Enum.reduce(BinaryTree.new, fn value, tree -> BinaryTree.insert(tree, value) end)
 
-      assert BinaryTree.height(tree) < 100
+      assert BinaryTree.height(tree) < 30
     end
   end
 
